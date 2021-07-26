@@ -1,5 +1,6 @@
 package com.company.security.jwt;
 
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -98,11 +99,12 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
         System.out.println("successful is working");
 
         System.out.println(request.getInputStream().available()+" request ");
-
         String hash = "securesecuresecuresecuresecuresecuresecuresecure";
+        Algorithm algorithm = Algorithm.HMAC256(hash.getBytes());
+
         System.out.println("this is continue");
         System.out.println(authResult.getCredentials()+"+"+authResult.getPrincipal().toString()+"+"+authResult.getDetails()+"+"+authResult.getName());
-       String token = Jwts.builder().setSubject(authResult.getName())
+       String access_token = Jwts.builder().setSubject(authResult.getName())
                 .claim("authorities", authResult.getAuthorities())
                 .setIssuedAt(new Date())
                 .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusWeeks(2)))
@@ -110,7 +112,13 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
                 .compact();
         System.out.println(SecurityContextHolder.getContext().getAuthentication()+" this is Holder2");
 
-        response.addHeader("Authorization", "Bearer "+ token);
+        String refresh_token = Jwts.builder().setSubject(authResult.getName())
+                .setIssuedAt(new Date())
+                .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusWeeks(10)))
+                .signWith(Keys.hmacShaKeyFor(hash.getBytes()))
+                .compact();
+        response.addHeader("Authorization", "Bearer "+ access_token);
+        response.setHeader("refresh_token",refresh_token);
     }
 }
 
