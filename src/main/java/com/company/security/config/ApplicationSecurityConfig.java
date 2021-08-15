@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -154,9 +155,15 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.authenticationProvider(daoAuthenticationProvider());
+            auth.authenticationProvider(daoAuthenticationProvider())
+            .authenticationEventPublisher(authenticationEventPublisher());
+//    .authenticationEventPublisher();
 //    auth.userDetailsService(applicationUserService);
 }
+    @Bean
+    public DefaultAuthenticationEventPublisher authenticationEventPublisher() {
+        return new DefaultAuthenticationEventPublisher();
+    }
 
 
   public PasswordEncoder getPasswordEncoder() {
